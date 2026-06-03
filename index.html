@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Payne's Dairies — Order Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F4EF;
+  --card:#FFFFFF;
+  --ink:#1C1A16;
+  --ink2:#6B6560;
+  --ink3:#B0AAA2;
+  --red:#B91C1C;
+  --red2:#991B1B;
+  --red-tint:#FEF2F2;
+  --gold:#92702A;
+  --border:rgba(28,26,22,0.10);
+  --border2:rgba(28,26,22,0.06);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;-webkit-font-smoothing:antialiased;}
+body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--ink);}
+
+/* ════════════════════════════════════════
+   MOBILE LAYOUT  (default, < 768px)
+════════════════════════════════════════ */
+.screen{display:none;position:fixed;inset:0;flex-direction:column;background:var(--bg);}
+.screen.active{display:flex;}
+
+/* ════════════════════════════════════════
+   DESKTOP LAYOUT  (≥ 768px)
+════════════════════════════════════════ */
+@media(min-width:768px){
+  html,body{overflow:auto;height:100%;background:#EEEBE4;}
+
+  .screen{
+    display:none !important;
+    position:static;
+    inset:unset;
+  }
+  .screen.active{
+    display:block !important;
+    position:static;
+  }
+
+  /* Desktop wrapper */
+  #desktop-shell{
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+  }
+
+  /* Desktop top nav */
+  #dt-nav{
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    padding:0 3rem;
+    height:64px;
+    display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:100;
+  }
+  .dt-brand{display:flex;align-items:center;gap:12px;}
+  .dt-logo{width:38px;height:38px;border-radius:50%;object-fit:contain;border:1px solid var(--border);}
+  .dt-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;letter-spacing:0.02em;}
+  .dt-nav-right{display:flex;align-items:center;gap:1rem;}
+  .dt-cart-btn{
+    display:flex;align-items:center;gap:8px;
+    background:var(--ink);color:#fff;
+    border:none;border-radius:8px;
+    padding:10px 18px;cursor:pointer;
+    font-family:'Jost',sans-serif;font-size:12px;
+    font-weight:500;letter-spacing:0.1em;text-transform:uppercase;
+    transition:background 0.15s;
+  }
+  .dt-cart-btn:hover{background:#333;}
+  .dt-cart-count{
+    background:var(--red);color:#fff;
+    border-radius:50%;width:20px;height:20px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:500;
+  }
+  .dt-signout{
+    background:none;border:1px solid var(--border);
+    color:var(--ink2);border-radius:8px;
+    padding:9px 16px;cursor:pointer;
+    font-family:'Jost',sans-serif;font-size:12px;
+    font-weight:400;letter-spacing:0.06em;
+    transition:background 0.15s,color 0.15s;
+  }
+  .dt-signout:hover{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  /* Desktop content area */
+  #dt-content{
+    flex:1;
+    padding:3rem;
+    max-width:1100px;
+    margin:0 auto;
+    width:100%;
+  }
+
+  /* Desktop page heading */
+  .dt-page-head{margin-bottom:2rem;}
+  .dt-eyebrow{
+    font-size:10px;letter-spacing:0.2em;text-transform:uppercase;
+    color:var(--gold);font-weight:500;margin-bottom:8px;
+  }
+  .dt-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:40px;font-weight:500;color:var(--ink);line-height:1.1;
+  }
+
+  /* Desktop product grid */
+  .dt-products{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:16px;
+    margin-bottom:2rem;
+  }
+  .dt-pc{
+    background:#fff;border:1px solid var(--border);
+    border-radius:16px;padding:1.75rem;
+    transition:box-shadow 0.2s,border-color 0.2s;
+  }
+  .dt-pc:hover{box-shadow:0 4px 20px rgba(28,26,22,0.08);border-color:rgba(28,26,22,0.18);}
+  .dt-pc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;}
+  .dt-pc-icon{
+    width:52px;height:52px;border-radius:12px;
+    background:var(--red-tint);
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+  }
+  .dt-pc-price{
+    font-family:'Cormorant Garamond',serif;
+    font-size:26px;font-weight:500;color:var(--red);
+  }
+  .dt-pc-name{
+    font-family:'Cormorant Garamond',serif;
+    font-size:20px;font-weight:500;color:var(--ink);margin-bottom:4px;
+  }
+  .dt-pc-vol{
+    font-size:11px;color:var(--ink3);
+    text-transform:uppercase;letter-spacing:0.08em;font-weight:300;
+    margin-bottom:1.5rem;
+  }
+  .dt-pc-bottom{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-top:1.25rem;border-top:1px solid var(--border2);
+  }
+  .dt-qty{display:flex;align-items:center;gap:10px;}
+  .dt-qty-label{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;}
+  .dt-qinput{
+    width:90px;padding:9px 10px;
+    border:1px solid var(--border);border-radius:8px;
+    font-family:'Jost',sans-serif;font-size:16px;font-weight:500;
+    color:var(--ink);background:var(--bg);
+    text-align:center;outline:none;-webkit-appearance:none;
+    transition:border-color 0.2s,box-shadow 0.2s;
+  }
+  .dt-qinput:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(185,28,28,0.08);}
+  .dt-addbtn{
+    background:var(--ink);color:#fff;border:none;
+    border-radius:8px;padding:10px 20px;
+    font-family:'Jost',sans-serif;font-size:11px;
+    font-weight:500;letter-spacing:0.1em;text-transform:uppercase;
+    cursor:pointer;transition:background 0.15s,transform 0.1s;
+  }
+  .dt-addbtn:hover{background:#333;}
+  .dt-addbtn:active{transform:scale(0.97);}
+  .dt-addbtn.done{background:#166534;}
+
+  /* Desktop 2-col layout for cart/checkout */
+  .dt-2col{display:grid;grid-template-columns:1fr 360px;gap:1.5rem;align-items:start;}
+
+  /* Desktop cart table */
+  .dt-cart-table{
+    background:#fff;border:1px solid var(--border);
+    border-radius:16px;overflow:hidden;
+  }
+  .dt-ct-head{
+    display:grid;grid-template-columns:1fr 80px 80px 40px;
+    padding:1rem 1.5rem;
+    border-bottom:1px solid var(--border);
+    font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--ink3);font-weight:500;gap:1rem;
+  }
+  .dt-ct-row{
+    display:grid;grid-template-columns:1fr 80px 80px 40px;
+    padding:1.25rem 1.5rem;
+    border-bottom:1px solid var(--border2);
+    align-items:center;gap:1rem;
+  }
+  .dt-ct-row:last-child{border-bottom:none;}
+  .dt-ct-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;}
+  .dt-ct-sub{font-size:11px;color:var(--ink3);font-weight:300;margin-top:2px;}
+  .dt-ct-price{font-size:14px;color:var(--ink2);font-weight:300;}
+  .dt-ct-total{font-size:15px;font-weight:500;color:var(--ink);}
+  .dt-ct-rm{
+    background:none;border:none;color:var(--ink3);
+    cursor:pointer;font-size:16px;padding:4px;
+    border-radius:6px;transition:color 0.15s;text-align:center;
+  }
+  .dt-ct-rm:hover{color:var(--red);}
+
+  /* Desktop summary card */
+  .dt-summary{
+    background:#fff;border:1px solid var(--border);
+    border-radius:16px;padding:1.5rem;
+    position:sticky;top:88px;
+  }
+  .dt-sum-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:20px;font-weight:500;
+    margin-bottom:1.25rem;
+    padding-bottom:1rem;border-bottom:1px solid var(--border);
+  }
+  .dt-sum-row{
+    display:flex;justify-content:space-between;
+    font-size:13px;color:var(--ink2);font-weight:300;
+    margin-bottom:8px;letter-spacing:0.02em;
+  }
+  .dt-sum-divider{height:1px;background:var(--border);margin:12px 0;}
+  .dt-sum-total{
+    display:flex;justify-content:space-between;align-items:baseline;
+    margin-bottom:1.25rem;
+  }
+  .dt-sum-total-label{font-size:13px;color:var(--ink2);}
+  .dt-sum-total-val{
+    font-family:'Cormorant Garamond',serif;
+    font-size:28px;font-weight:500;color:var(--ink);
+  }
+  .dt-sum-btn{
+    width:100%;padding:14px;
+    background:var(--ink);color:#fff;border:none;
+    border-radius:10px;
+    font-family:'Jost',sans-serif;font-size:12px;
+    font-weight:500;letter-spacing:0.12em;text-transform:uppercase;
+    cursor:pointer;transition:background 0.15s;
+  }
+  .dt-sum-btn:hover{background:#333;}
+
+  /* Desktop checkout fields */
+  .dt-co-fields{
+    background:#fff;border:1px solid var(--border);
+    border-radius:16px;padding:1.75rem;
+  }
+  .dt-co-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:20px;font-weight:500;margin-bottom:1.5rem;
+    padding-bottom:1rem;border-bottom:1px solid var(--border);
+  }
+  .dt-field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .dt-field-wrap{margin-bottom:1.25rem;}
+  .dt-field-label{
+    display:block;font-size:10px;letter-spacing:0.14em;
+    text-transform:uppercase;color:var(--ink2);
+    font-weight:500;margin-bottom:8px;
+  }
+  .dt-field-input{
+    width:100%;background:var(--bg);
+    border:1px solid var(--border);border-radius:10px;
+    padding:13px 16px;font-family:'Jost',sans-serif;
+    font-size:14px;font-weight:300;color:var(--ink);
+    outline:none;-webkit-appearance:none;
+    transition:border-color 0.2s,box-shadow 0.2s;
+  }
+  .dt-field-input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(185,28,28,0.08);}
+
+  /* Desktop order summary in checkout */
+  .dt-co-sum-row{
+    display:flex;justify-content:space-between;
+    font-size:13px;color:var(--ink2);font-weight:300;
+    padding:8px 0;border-bottom:1px solid var(--border2);
+    letter-spacing:0.02em;
+  }
+  .dt-co-sum-row:last-child{border-bottom:none;}
+
+  /* Desktop back link */
+  .dt-back{
+    display:inline-flex;align-items:center;gap:6px;
+    background:none;border:none;color:var(--ink2);
+    font-family:'Jost',sans-serif;font-size:13px;
+    font-weight:300;cursor:pointer;padding:0;
+    margin-bottom:1.5rem;letter-spacing:0.04em;
+    transition:color 0.15s;
+  }
+  .dt-back:hover{color:var(--ink);}
+
+  /* Desktop login */
+  #dt-login-wrap{
+    min-height:100vh;display:flex;
+    background:#1C1A16;
+  }
+  .dt-login-left{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:4rem;
+    background:
+      radial-gradient(ellipse 80% 60% at 40% 50%, rgba(185,28,28,0.28) 0%, transparent 65%),
+      #1C1A16;
+  }
+  .dt-login-logo{
+    width:120px;height:120px;border-radius:50%;
+    border:1px solid rgba(255,255,255,0.2);
+    padding:6px;margin-bottom:2rem;
+  }
+  .dt-login-logo img{width:100%;height:100%;border-radius:50%;object-fit:contain;background:#fff;}
+  .dt-login-wordmark{
+    font-family:'Cormorant Garamond',serif;
+    font-size:44px;font-weight:500;color:#fff;
+    letter-spacing:0.04em;text-align:center;line-height:1;
+    margin-bottom:12px;
+  }
+  .dt-login-rule{width:50px;height:1px;background:rgba(255,255,255,0.2);margin:0 auto 14px;}
+  .dt-login-tag{
+    font-size:11px;letter-spacing:0.22em;text-transform:uppercase;
+    color:rgba(255,255,255,0.35);
+  }
+  .dt-login-right{
+    width:460px;background:var(--bg);
+    display:flex;flex-direction:column;
+    justify-content:center;padding:4rem;
+  }
+  .dt-login-head{
+    font-family:'Cormorant Garamond',serif;
+    font-size:34px;font-style:italic;font-weight:400;
+    color:var(--ink);margin-bottom:6px;
+  }
+  .dt-login-sub{
+    font-size:13px;color:var(--ink3);font-weight:300;
+    margin-bottom:2.5rem;letter-spacing:0.02em;
+  }
+  .dt-login-btn{
+    width:100%;padding:15px;
+    background:var(--ink);color:#fff;border:none;
+    border-radius:10px;font-family:'Jost',sans-serif;
+    font-size:12px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;
+    cursor:pointer;margin-top:0.5rem;transition:background 0.15s;
+  }
+  .dt-login-btn:hover{background:#333;}
+  .dt-login-err{
+    color:var(--red);font-size:12px;
+    margin-top:12px;display:none;font-weight:300;
+  }
+
+  /* Desktop confirm */
+  .dt-confirm-wrap{
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    min-height:calc(100vh - 64px);
+    text-align:center;padding:4rem;
+  }
+  .dt-conf-rule{width:1px;height:80px;background:var(--border);margin:0 auto 2.5rem;}
+  .dt-conf-check{
+    width:72px;height:72px;border-radius:50%;
+    border:1px solid #166534;background:#F0FDF4;
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 2rem;font-size:30px;
+    animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .dt-conf-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:48px;font-weight:500;color:var(--ink);
+    margin-bottom:0.75rem;line-height:1;
+  }
+  .dt-conf-ref{
+    font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--gold);font-weight:500;margin-bottom:1.5rem;
+  }
+  .dt-conf-body{
+    font-size:14px;color:var(--ink3);line-height:1.8;
+    font-weight:300;margin-bottom:3rem;max-width:360px;
+  }
+  .dt-conf-btn{
+    background:var(--ink);color:#fff;border:none;
+    border-radius:10px;padding:14px 40px;
+    font-family:'Jost',sans-serif;font-size:12px;
+    font-weight:500;letter-spacing:0.14em;text-transform:uppercase;
+    cursor:pointer;transition:background 0.15s;
+  }
+  .dt-conf-btn:hover{background:#333;}
+
+  /* mobile-only hidden on desktop via JS */
+}
+
+/* ════════════════════════════════════════
+   MOBILE STYLES (shared)
+════════════════════════════════════════ */
+@media(max-width:767px){
+  /* desktop-only hidden on mobile via JS */
+  #dt-login-wrap{display:none !important;}
+
+  /* Login */
+  #s-login{background:#1C1A16;justify-content:flex-end;}
+  .login-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 10%,rgba(185,28,28,0.28) 0%,transparent 70%),#1C1A16;}
+  .login-top{position:absolute;top:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;padding-top:14vh;z-index:2;}
+  .login-logo-ring{width:90px;height:90px;border-radius:50%;border:1px solid rgba(255,255,255,0.18);padding:4px;margin-bottom:1.5rem;}
+  .login-logo-ring img{width:100%;height:100%;border-radius:50%;object-fit:contain;background:#fff;}
+  .login-wordmark{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;color:#fff;letter-spacing:0.04em;text-align:center;line-height:1;}
+  .login-rule{width:40px;height:1px;background:rgba(255,255,255,0.25);margin:14px auto;}
+  .login-tagline{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.35);}
+  .login-panel{position:relative;z-index:2;background:var(--bg);border-radius:24px 24px 0 0;padding:2.25rem 1.75rem 2rem;}
+  .login-panel-head{font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;font-weight:400;color:var(--ink);margin-bottom:4px;}
+  .login-panel-sub{font-size:12px;color:var(--ink3);letter-spacing:0.04em;margin-bottom:2rem;font-weight:300;}
+  .lf-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink2);font-weight:500;margin-bottom:8px;display:block;}
+  .lf-input{width:100%;background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'Jost',sans-serif;font-size:15px;font-weight:300;color:var(--ink);outline:none;margin-bottom:1rem;-webkit-appearance:none;transition:border-color 0.2s;}
+  .lf-input:focus{border-color:var(--red);}
+  .lf-btn{width:100%;padding:15px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:14px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;margin-top:4px;}
+  .lf-btn:active{background:var(--red2);}
+  .lf-err{color:var(--red);font-size:12px;text-align:center;margin-top:10px;display:none;font-weight:300;}
+
+  /* Header */
+  .hdr{background:#fff;border-bottom:1px solid var(--border);padding:0 18px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .hdr-brand{display:flex;align-items:center;gap:10px;}
+  .hdr-logo{width:32px;height:32px;border-radius:50%;object-fit:contain;border:1px solid var(--border);}
+  .hdr-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;letter-spacing:0.02em;color:var(--ink);}
+  .hdr-actions{display:flex;gap:8px;}
+  .hdr-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:15px;color:var(--ink);-webkit-tap-highlight-color:transparent;}
+  .hdr-btn:active{background:var(--border);}
+  .hdr-badge{position:absolute;top:-3px;right:-3px;background:var(--red);color:#fff;width:17px;height:17px;border-radius:50%;font-size:10px;font-weight:500;display:flex;align-items:center;justify-content:center;}
+
+  /* Section head */
+  .sec-head{padding:1.5rem 1.5rem 0.75rem;flex-shrink:0;}
+  .sec-head-eyebrow{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:6px;}
+  .sec-head-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;color:var(--ink);line-height:1.1;}
+
+  /* Scroll */
+  .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 1.25rem 1rem;}
+
+  /* Product cards */
+  .pc{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:12px 10px;}
+  .pc-top{display:flex;align-items:flex-start;gap:12px;}
+  .pc-icon{width:44px;height:44px;border-radius:10px;background:var(--red-tint);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+  .pc-meta{flex:1;}
+  .pc-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;color:var(--ink);line-height:1.2;}
+  .pc-vol{font-size:11px;color:var(--ink3);letter-spacing:0.06em;margin-top:3px;text-transform:uppercase;font-weight:300;}
+  .pc-price{font-size:20px;font-weight:400;color:var(--red);font-family:'Cormorant Garamond',serif;align-self:center;}
+  .pc-bottom{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border2);padding-top:12px;}
+  .pc-qty{display:flex;align-items:center;gap:8px;}
+  .pc-qty-label{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;}
+  .pc-qinput{
+    width:72px;padding:8px 6px;
+    border:1px solid var(--border);border-radius:8px;
+    font-family:'Jost',sans-serif;font-size:16px;font-weight:500;
+    color:var(--ink);background:var(--bg);
+    text-align:center;outline:none;-webkit-appearance:none;
+    -webkit-tap-highlight-color:transparent;
+    transition:border-color 0.2s;
+  }
+  .pc-qinput:focus{border-color:var(--red);}
+  .pc-addbtn{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-family:'Jost',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .pc-addbtn:active{background:#333;}
+  .pc-addbtn.done{background:#166534;}
+
+  /* Bottom bar */
+  .bbar{flex-shrink:0;background:#fff;border-top:1px solid var(--border);padding:12px 18px 18px;}
+  .bbar-btn{width:100%;padding:16px 20px;background:var(--ink);color:#fff;border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .bbar-btn:active{background:#333;}
+  .bbar-btn .total{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;letter-spacing:0.02em;text-transform:none;}
+
+  /* Cart */
+  .back-lnk{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--ink2);font-family:'Jost',sans-serif;font-size:13px;font-weight:300;cursor:pointer;padding:0;margin-bottom:1.25rem;letter-spacing:0.04em;}
+  .ci{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border2);}
+  .ci-dot{width:42px;height:42px;border-radius:10px;background:var(--red-tint);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .ci-body{flex:1;}
+  .ci-name{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;color:var(--ink);}
+  .ci-sub{font-size:11px;color:var(--ink3);font-weight:300;margin-top:2px;letter-spacing:0.04em;}
+  .ci-amt{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;color:var(--ink);}
+  .ci-x{background:none;border:none;color:var(--ink3);font-size:16px;cursor:pointer;padding:6px;border-radius:6px;}
+  .ci-x:active{color:var(--red);}
+  .totals{margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;}
+  .trow{display:flex;justify-content:space-between;font-size:13px;font-weight:300;color:var(--ink2);margin-bottom:8px;letter-spacing:0.02em;}
+  .trow.grand{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--ink);margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+
+  /* Checkout */
+  .co-block{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:12px;}
+  .co-blk-label{font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:1rem;}
+  .co-line{display:flex;justify-content:space-between;font-size:13px;font-weight:300;color:var(--ink2);padding:8px 0;border-bottom:1px solid var(--border2);letter-spacing:0.02em;}
+  .co-line:last-child{border-bottom:none;}
+  .co-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;margin-top:6px;border-top:1px solid var(--border);}
+  .co-total-label{font-size:13px;font-weight:400;color:var(--ink2);}
+  .co-total-val{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;color:var(--ink);}
+
+  /* Confirm */
+  #s-confirm{align-items:center;justify-content:center;padding:2.5rem 2rem;text-align:center;}
+  .conf-line{width:1px;height:60px;background:var(--border);margin:0 auto 2rem;}
+  .conf-check{width:64px;height:64px;border-radius:50%;border:1px solid #166534;background:#F0FDF4;display:flex;align-items:center;justify-content:center;margin:0 auto 2rem;font-size:28px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+  .conf-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;color:var(--ink);margin-bottom:0.75rem;line-height:1.1;}
+  .conf-ref{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;font-weight:500;}
+  .conf-body{font-size:13px;color:var(--ink3);line-height:1.8;font-weight:300;margin-bottom:3rem;max-width:260px;}
+  .conf-btn{background:var(--ink);color:#fff;border:none;border-radius:12px;padding:15px 36px;font-family:'Jost',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;}
+  .conf-btn:active{background:#333;}
+  .empty{text-align:center;padding:4rem 1rem;color:var(--ink3);font-size:14px;font-weight:300;letter-spacing:0.04em;}
+}
+
+@keyframes popIn{from{transform:scale(0.4);opacity:0;}to{transform:scale(1);opacity:1;}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     DESKTOP HTML
+══════════════════════════════════════ -->
+
+
+  <!-- Desktop Login -->
+  <div id="dt-login-wrap">
+    <div class="dt-login-left">
+      <div class="dt-login-logo"><img src="https://static.wixstatic.com/media/777559_18229c6cde244d7988113595be4ad9c5~mv2.jpg/v1/fill/w_127,h_124,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo.jpg" alt=""/></div>
+      <div class="dt-login-wordmark">Payne's Dairies</div>
+      <div class="dt-login-rule"></div>
+      <div class="dt-login-tag">For quality &amp; service</div>
+    </div>
+    <div class="dt-login-right">
+      <div class="dt-login-head">Welcome back</div>
+      <div class="dt-login-sub">Sign in to your account to place an order</div>
+      <label class="dt-field-label">Username</label>
+      <input type="text" class="dt-field-input" id="dt-user" placeholder="Enter your username" autocomplete="username"/>
+      <div style="height:1rem"></div>
+      <label class="dt-field-label">Password</label>
+      <input type="password" class="dt-field-input" id="dt-pass" placeholder="Enter your password" autocomplete="current-password"/>
+      <button class="dt-login-btn" onclick="dtLogin()" style="margin-top:1.5rem;">Sign in</button>
+      <div class="dt-login-err" id="dt-err">Incorrect username or password. Please try again.</div>
+    </div>
+  </div>
+
+  <!-- Desktop App (nav + content) -->
+  <div id="dt-app" style="display:none;">
+    <div id="dt-nav">
+      <div class="dt-brand">
+        <img class="dt-logo" src="https://static.wixstatic.com/media/777559_18229c6cde244d7988113595be4ad9c5~mv2.jpg/v1/fill/w_127,h_124,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo.jpg" alt=""/>
+        <span class="dt-name">Payne's Dairies</span>
+      </div>
+      <div class="dt-nav-right">
+        <button class="dt-cart-btn" onclick="dtShowCart()">
+          🛒 &nbsp;Cart
+          <span class="dt-cart-count" id="dt-count">0</span>
+        </button>
+        <button class="dt-signout" onclick="dtLogout()">Sign out</button>
+      </div>
+    </div>
+    <div id="dt-content">
+
+      <!-- Shop view -->
+      <div id="dt-shop">
+        <div class="dt-page-head">
+          <div class="dt-eyebrow">Fresh dairy</div>
+          <div class="dt-title">Place your order</div>
+        </div>
+        <div class="dt-products" id="dt-products"></div>
+      </div>
+
+      <!-- Cart view -->
+      <div id="dt-cart" style="display:none;">
+        <button class="dt-back" onclick="dtShowShop()">← Continue shopping</button>
+        <div class="dt-page-head">
+          <div class="dt-eyebrow">Review</div>
+          <div class="dt-title">Your cart</div>
+        </div>
+        <div class="dt-2col">
+          <div class="dt-cart-table" id="dt-cart-table"></div>
+          <div class="dt-summary" id="dt-summary"></div>
+        </div>
+      </div>
+
+      <!-- Checkout view -->
+      <div id="dt-checkout" style="display:none;">
+        <button class="dt-back" onclick="dtShowCart()">← Back to cart</button>
+        <div class="dt-page-head">
+          <div class="dt-eyebrow">Final step</div>
+          <div class="dt-title">Checkout</div>
+        </div>
+        <div class="dt-2col">
+          <div class="dt-co-fields">
+            <div class="dt-co-title">Delivery details</div>
+            <div class="dt-field-wrap">
+              <label class="dt-field-label">Delivery address</label>
+              <input type="text" class="dt-field-input" value="123 High Street, York, YO1 1AB"/>
+            </div>
+            <div class="dt-field-row">
+              <div class="dt-field-wrap">
+                <label class="dt-field-label">Requested delivery date</label>
+                <input type="date" class="dt-field-input" id="dt-del-date"/>
+              </div>
+              <div class="dt-field-wrap">
+                <label class="dt-field-label">PO number <span style="opacity:0.5">(optional)</span></label>
+                <input type="text" class="dt-field-input" placeholder="e.g. PO-12345"/>
+              </div>
+            </div>
+            <div class="dt-field-wrap" style="margin-bottom:0">
+              <label class="dt-field-label">Delivery notes</label>
+              <input type="text" class="dt-field-input" placeholder="Any special instructions…"/>
+            </div>
+          </div>
+          <div class="dt-summary" id="dt-co-summary"></div>
+        </div>
+      </div>
+
+      <!-- Confirm view -->
+      <div id="dt-confirm" style="display:none;">
+        <div class="dt-confirm-wrap">
+          <div class="dt-conf-rule"></div>
+          <div class="dt-conf-check">✓</div>
+          <div class="dt-conf-title">Order confirmed</div>
+          <div class="dt-conf-ref" id="dt-conf-ref">PD-000000</div>
+          <div class="dt-conf-body">Your order has been received and will be processed shortly. A confirmation has been sent to your registered email address.</div>
+          <button class="dt-conf-btn" onclick="dtShowShop()">Place another order</button>
+        </div>
+      </div>
+
+    </div><!-- /dt-content -->
+  </div><!-- /dt-app -->
+</div><!-- /desktop-shell -->
+
+
+<!-- ══════════════════════════════════════
+     MOBILE HTML
+══════════════════════════════════════ -->
+
+
+  <div id="s-login" class="screen active">
+    <div class="login-bg"></div>
+    <div class="login-top">
+      <div class="login-logo-ring"><img src="https://static.wixstatic.com/media/777559_18229c6cde244d7988113595be4ad9c5~mv2.jpg/v1/fill/w_127,h_124,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo.jpg" alt="Payne's Dairies"/></div>
+      <div class="login-wordmark">Payne's Dairies</div>
+      <div class="login-rule"></div>
+      <div class="login-tagline">For quality &amp; service</div>
+    </div>
+    <div class="login-panel">
+      <div class="login-panel-head">Welcome back</div>
+      <div class="login-panel-sub">Sign in to your account to place an order</div>
+      <label class="lf-label">Username</label>
+      <input type="text" class="lf-input" id="m-user" placeholder="Enter your username" autocomplete="username"/>
+      <label class="lf-label">Password</label>
+      <input type="password" class="lf-input" id="m-pass" placeholder="Enter your password" autocomplete="current-password"/>
+      <button class="lf-btn" onclick="mLogin()">Sign in</button>
+      <div class="lf-err" id="m-err">Incorrect username or password</div>
+    </div>
+  </div>
+
+  <div id="s-shop" class="screen">
+    <div class="hdr">
+      <div class="hdr-brand">
+        <img class="hdr-logo" src="https://static.wixstatic.com/media/777559_18229c6cde244d7988113595be4ad9c5~mv2.jpg/v1/fill/w_127,h_124,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo.jpg" alt=""/>
+        <span class="hdr-name">Payne's Dairies</span>
+      </div>
+      <div class="hdr-actions">
+        <div class="hdr-btn" onclick="mShowCart()">🛒<span class="hdr-badge" id="m-count">0</span></div>
+        <div class="hdr-btn" onclick="mLogout()" style="font-size:13px;color:var(--ink2);">✕</div>
+      </div>
+    </div>
+    <div class="sec-head">
+      <div class="sec-head-eyebrow">Fresh dairy</div>
+      <div class="sec-head-title">Place your<br>order</div>
+    </div>
+    <div class="scroll"><div id="m-products"></div></div>
+    <div class="bbar">
+      <button class="bbar-btn" onclick="mShowCart()">
+        <span>View cart</span>
+        <span class="total" id="m-pill-total">£0.00</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="s-cart" class="screen">
+    <div class="hdr">
+      <div class="hdr-brand">
+        <img class="hdr-logo" src="https://static.wixstatic.com/media/777559_18229c6cde244d7988113595be4ad9c5~mv2.jpg/v1/fill/w_127,h_124,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo.jpg" alt=""/>
+        <span class="hdr-name">Your cart</span>
+      </div>
+    </div>
+    <div class="scroll">
+      <div style="height:1rem"></div>
+      <button class="back-lnk" onclick="mShowShop()">← Continue shopping</button>
+      <div id="m-cart-items"></div>
+    </div>
+    <div class="bbar">
+      <button class="bbar-btn" onclick="mShowCheckout()">
+        <span>Checkout</span>
+        <span class="total" id="m-cart-bar-total">£0.00</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="s-checkout" class="screen">
+    <div class="hdr">
+      <div class="hdr-brand">
+        <img class="hdr-logo" src="https://static.wixstatic.com/media/777559_18229c6cde244d7988113595be4ad9c5~mv2.jpg/v1/fill/w_127,h_124,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo.jpg" alt=""/>
+        <span class="hdr-name">Checkout</span>
+      </div>
+    </div>
+    <div class="scroll">
+      <div style="height:1rem"></div>
+      <button class="back-lnk" onclick="mShowCart()">← Back to cart</button>
+      <div class="co-block">
+        <div class="co-blk-label">Delivery details</div>
+        <label class="lf-label">Delivery address</label>
+        <input type="text" class="lf-input" value="123 High Street, York"/>
+        <label class="lf-label">Delivery date</label>
+        <input type="date" class="lf-input" id="m-del-date"/>
+        <label class="lf-label">PO number <span style="opacity:0.5;font-size:9px">(optional)</span></label>
+        <input type="text" class="lf-input" placeholder="e.g. PO-12345" style="margin-bottom:0"/>
+      </div>
+      <div class="co-block">
+        <div class="co-blk-label">Order summary</div>
+        <div id="m-order-lines"></div>
+      </div>
+    </div>
+    <div class="bbar">
+      <button class="bbar-btn" onclick="mPlaceOrder()">
+        <span>Confirm order</span>
+        <span class="total" id="m-order-total">£0.00</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="s-confirm" class="screen">
+    <div class="conf-line"></div>
+    <div class="conf-check">✓</div>
+    <div class="conf-title">Order<br>confirmed</div>
+    <div class="conf-ref" id="conf-ref">PD-000000</div>
+    <div class="conf-body">Your order has been received and will be processed shortly. A confirmation has been sent to your registered email address.</div>
+    <button class="conf-btn" onclick="mShowShop()">Place another order</button>
+  </div>
+
+</div><!-- /mobile-shell -->
+
+<script>
+const PRODUCTS=[
+  {id:1,name:'Skimmed Milk',     vol:'2 litre',price:1.50,emoji:'🥛'},
+  {id:2,name:'Semi-skimmed Milk',vol:'2 litre',price:1.50,emoji:'🥛'},
+  {id:3,name:'Whole Milk',       vol:'2 litre',price:1.50,emoji:'🥛'},
+];
+let cart={},qtys={};
+PRODUCTS.forEach(p=>{qtys[p.id]=1;});
+
+const isDesktop=()=>Math.max(window.innerWidth, document.documentElement.clientWidth) >= 768;
+
+/* ── INIT ── */
+function init(){
+  const dt=document.getElementById('desktop-shell');
+  const mb=document.getElementById('mobile-shell');
+  if(isDesktop()){
+    dt.style.cssText='display:block !important';
+    mb.style.cssText='display:none !important';
+  }else{
+    dt.style.cssText='display:none !important';
+    mb.style.cssText='display:block !important';
+  }
+}
+
+// Run immediately, then again after fonts/layout settle (fixes iOS timing issue)
+init();
+window.addEventListener('resize',init);
+window.addEventListener('load',init);
+document.addEventListener('DOMContentLoaded',init);
+
+/* ════════════════════════
+   DESKTOP LOGIC
+════════════════════════ */
+document.getElementById('dt-pass')&&document.getElementById('dt-pass').addEventListener('keydown',e=>{if(e.key==='Enter')dtLogin();});
+
+function dtLogin(){
+  const u=document.getElementById('dt-user').value.trim();
+  const p=document.getElementById('dt-pass').value.trim();
+  if(u==='paynes'&&p==='test'){
+    document.getElementById('dt-err').style.display='none';
+    document.getElementById('dt-login-wrap').style.display='none';
+    document.getElementById('dt-app').style.display='block';
+    dtRenderProducts();
+  }else{
+    document.getElementById('dt-err').style.display='block';
+  }
+}
+
+function dtLogout(){
+  cart={};qtys={};PRODUCTS.forEach(p=>qtys[p.id]=1);dtUpdateCart();
+  document.getElementById('dt-user').value='';document.getElementById('dt-pass').value='';
+  document.getElementById('dt-app').style.display='none';
+  document.getElementById('dt-login-wrap').style.display='flex';
+}
+
+function dtView(id){
+  ['dt-shop','dt-cart','dt-checkout','dt-confirm'].forEach(v=>{
+    document.getElementById(v).style.display=v===id?'block':'none';
+  });
+}
+
+function dtRenderProducts(){
+  document.getElementById('dt-products').innerHTML=PRODUCTS.map(p=>`
+    <div class="dt-pc">
+      <div class="dt-pc-top">
+        <div class="dt-pc-icon">${p.emoji}</div>
+        <div class="dt-pc-price">£${p.price.toFixed(2)}</div>
+      </div>
+      <div class="dt-pc-name">${p.name}</div>
+      <div class="dt-pc-vol">${p.vol}</div>
+      <div class="dt-pc-bottom">
+        <div class="dt-qty">
+          <span class="dt-qty-label">Qty</span>
+          <input type="number" class="dt-qinput" id="dqv-${p.id}" value="1" min="1" max="9999"
+            onchange="dtSetQty(${p.id}, this.value)"
+            oninput="dtSetQty(${p.id}, this.value)" />
+        </div>
+        <button class="dt-addbtn" id="dab-${p.id}" onclick="dtAdd(${p.id})">Add to order</button>
+      </div>
+    </div>`).join('');
+}
+
+function dtSetQty(id,val){const q=parseInt(val);if(q>0)qtys[id]=q;}
+function dtAdd(id){
+  cart[id]=(cart[id]||0)+qtys[id];dtUpdateCart();
+  const b=document.getElementById('dab-'+id);
+  b.classList.add('done');b.textContent='Added ✓';
+  setTimeout(()=>{b.classList.remove('done');b.textContent='Add to order';},1400);
+}
+function dtUpdateCart(){
+  const count=Object.values(cart).reduce((a,b)=>a+b,0);
+  document.getElementById('dt-count').textContent=count;
+}
+function dtShowShop(){dtView('dt-shop');}
+function dtShowCart(){
+  const ids=Object.keys(cart).filter(id=>cart[id]>0);
+  let sub=0;
+  if(!ids.length){
+    document.getElementById('dt-cart-table').innerHTML='<div style="padding:3rem;text-align:center;color:var(--ink3);font-weight:300;letter-spacing:0.04em;">Your cart is empty</div>';
+    document.getElementById('dt-summary').innerHTML='';
+  }else{
+    const rows=ids.map(id=>{
+      const p=PRODUCTS.find(x=>x.id==id);const line=p.price*cart[id];sub+=line;
+      return`<div class="dt-ct-row">
+        <div><div class="dt-ct-name">${p.name}</div><div class="dt-ct-sub">${p.vol}</div></div>
+        <div class="dt-ct-price">£${p.price.toFixed(2)}</div>
+        <div class="dt-ct-total">£${line.toFixed(2)}</div>
+        <button class="dt-ct-rm" onclick="dtRemove(${id})">✕</button>
+      </div>`;
+    }).join('');
+    document.getElementById('dt-cart-table').innerHTML=`
+      <div class="dt-ct-head"><span>Product</span><span>Unit</span><span>Total</span><span></span></div>
+      ${rows}`;
+    const vat=sub*0.2,total=sub+vat;
+    document.getElementById('dt-summary').innerHTML=`
+      <div class="dt-sum-title">Order summary</div>
+      <div class="dt-sum-row"><span>Subtotal (ex. VAT)</span><span>£${sub.toFixed(2)}</span></div>
+      <div class="dt-sum-row"><span>VAT (20%)</span><span>£${vat.toFixed(2)}</span></div>
+      <div class="dt-sum-divider"></div>
+      <div class="dt-sum-total"><span class="dt-sum-total-label">Total</span><span class="dt-sum-total-val">£${total.toFixed(2)}</span></div>
+      <button class="dt-sum-btn" onclick="dtShowCheckout()">Proceed to checkout</button>`;
+  }
+  dtView('dt-cart');
+}
+function dtRemove(id){delete cart[id];dtUpdateCart();dtShowCart();}
+function dtShowCheckout(){
+  const ids=Object.keys(cart).filter(id=>cart[id]>0);
+  let sub=0;
+  const lines=ids.map(id=>{
+    const p=PRODUCTS.find(x=>x.id==id);const line=p.price*cart[id];sub+=line;
+    return`<div class="dt-co-sum-row"><span>${p.name} × ${cart[id]}</span><span>£${line.toFixed(2)}</span></div>`;
+  }).join('');
+  const total=sub*1.2;
+  document.getElementById('dt-co-summary').innerHTML=`
+    <div class="dt-sum-title">Summary</div>
+    ${lines}
+    <div class="dt-sum-divider"></div>
+    <div class="dt-sum-total"><span class="dt-sum-total-label">Total inc. VAT</span><span class="dt-sum-total-val">£${total.toFixed(2)}</span></div>
+    <button class="dt-sum-btn" onclick="dtPlaceOrder()">Confirm order</button>`;
+  const t=new Date();t.setDate(t.getDate()+1);
+  document.getElementById('dt-del-date').value=t.toISOString().split('T')[0];
+  dtView('dt-checkout');
+}
+function dtPlaceOrder(){
+  const ref='PD-'+String(Math.floor(100000+Math.random()*900000));
+  document.getElementById('dt-conf-ref').textContent=ref;
+  cart={};PRODUCTS.forEach(p=>{qtys[p.id]=1;const e=document.getElementById('dqv-'+p.id);if(e)e.value=1;});
+  dtUpdateCart();dtView('dt-confirm');
+}
+
+/* ════════════════════════
+   MOBILE LOGIC
+════════════════════════ */
+document.getElementById('m-pass').addEventListener('keydown',e=>{if(e.key==='Enter')mLogin();});
+function mShow(id){document.querySelectorAll('#mobile-shell .screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function mLogin(){
+  const u=document.getElementById('m-user').value.trim();
+  const p=document.getElementById('m-pass').value.trim();
+  if(u==='paynes'&&p==='test'){
+    document.getElementById('m-err').style.display='none';
+    mRenderProducts();mShow('s-shop');
+  }else{document.getElementById('m-err').style.display='block';}
+}
+function mLogout(){
+  cart={};PRODUCTS.forEach(p=>qtys[p.id]=1);mUpdateCart();
+  document.getElementById('m-user').value='';document.getElementById('m-pass').value='';
+  mShow('s-login');
+}
+function mRenderProducts(){
+  document.getElementById('m-products').innerHTML=PRODUCTS.map(p=>`
+    <div class="pc">
+      <div class="pc-top">
+        <div class="pc-icon">${p.emoji}</div>
+        <div class="pc-meta"><div class="pc-name">${p.name}</div><div class="pc-vol">${p.vol}</div></div>
+        <div class="pc-price">£${p.price.toFixed(2)}</div>
+      </div>
+      <div class="pc-bottom">
+        <div class="pc-qty">
+          <span class="pc-qty-label">Qty</span>
+          <input type="number" class="pc-qinput" id="qv-${p.id}" value="1" min="1" max="9999"
+            onchange="mSetQty(${p.id}, this.value)"
+            oninput="mSetQty(${p.id}, this.value)" />
+        </div>
+        <button class="pc-addbtn" id="ab-${p.id}" onclick="mAdd(${p.id})">Add to order</button>
+      </div>
+    </div>`).join('');
+}
+function mSetQty(id,val){const q=parseInt(val);if(q>0)qtys[id]=q;}
+function mAdd(id){
+  cart[id]=(cart[id]||0)+qtys[id];mUpdateCart();
+  const b=document.getElementById('ab-'+id);
+  b.classList.add('done');b.textContent='Added ✓';
+  setTimeout(()=>{b.classList.remove('done');b.textContent='Add to order';},1400);
+}
+function mUpdateCart(){
+  const count=Object.values(cart).reduce((a,b)=>a+b,0);
+  const total=Object.keys(cart).reduce((s,id)=>s+PRODUCTS.find(p=>p.id==id).price*cart[id],0);
+  document.getElementById('m-count').textContent=count;
+  document.getElementById('m-pill-total').textContent='£'+(total*1.2).toFixed(2);
+}
+function mShowShop(){mShow('s-shop');}
+function mShowCart(){
+  const ids=Object.keys(cart).filter(id=>cart[id]>0);let sub=0;
+  if(!ids.length){
+    document.getElementById('m-cart-items').innerHTML='<div class="empty">Your cart is empty</div>';
+  }else{
+    const rows=ids.map(id=>{
+      const p=PRODUCTS.find(x=>x.id==id);const line=p.price*cart[id];sub+=line;
+      return`<div class="ci"><div class="ci-dot">${p.emoji}</div><div class="ci-body"><div class="ci-name">${p.name}</div><div class="ci-sub">${p.vol} · £${p.price.toFixed(2)} × ${cart[id]}</div></div><div class="ci-amt">£${line.toFixed(2)}</div><button class="ci-x" onclick="mRemove(${id})">✕</button></div>`;
+    }).join('');
+    const vat=sub*0.2,total=sub+vat;
+    document.getElementById('m-cart-items').innerHTML=rows+`<div class="totals"><div class="trow"><span>Subtotal (ex. VAT)</span><span>£${sub.toFixed(2)}</span></div><div class="trow"><span>VAT (20%)</span><span>£${vat.toFixed(2)}</span></div><div class="trow grand"><span>Total</span><span>£${total.toFixed(2)}</span></div></div>`;
+    document.getElementById('m-cart-bar-total').textContent='£'+total.toFixed(2);
+  }
+  mShow('s-cart');
+}
+function mRemove(id){delete cart[id];mUpdateCart();mShowCart();}
+function mShowCheckout(){
+  const ids=Object.keys(cart).filter(id=>cart[id]>0);let sub=0;
+  const lines=ids.map(id=>{const p=PRODUCTS.find(x=>x.id==id);const line=p.price*cart[id];sub+=line;return`<div class="co-line"><span>${p.name} × ${cart[id]}</span><span>£${line.toFixed(2)}</span></div>`;}).join('');
+  document.getElementById('m-order-lines').innerHTML=lines+`<div class="co-total"><span class="co-total-label">Total inc. VAT</span><span class="co-total-val">£${(sub*1.2).toFixed(2)}</span></div>`;
+  document.getElementById('m-order-total').textContent='£'+(sub*1.2).toFixed(2);
+  const t=new Date();t.setDate(t.getDate()+1);document.getElementById('m-del-date').value=t.toISOString().split('T')[0];
+  mShow('s-checkout');
+}
+function mPlaceOrder(){
+  const ref='PD-'+String(Math.floor(100000+Math.random()*900000));
+  document.getElementById('conf-ref').textContent=ref;
+  cart={};PRODUCTS.forEach(p=>{qtys[p.id]=1;const e=document.getElementById('qv-'+p.id);if(e)e.value=1;});
+  mUpdateCart();mShow('s-confirm');
+}
+</script>
+</body>
+</html>
